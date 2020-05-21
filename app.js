@@ -1,37 +1,14 @@
-const puppeteer = require('puppeteer');
+const express = require('express');
+const routes = require('./routes/routes');
+require('dotenv/config')
 
-const getInfo = async() => {
-    console.log('Starting data scrap');
-    let chromium = await puppeteer.launch();
-    let browser = await chromium.newPage();
-    await browser.goto('https://www.saopaulo.sp.gov.br/noticias-coronavirus/');
-    const info = await browser.evaluate(()=>{
+const app = express();
 
-        let json =  document.querySelectorAll('.style-post-list .post');
-        let contact = Object.keys(json).map(i => {
-            let index = Number(i);
-            let news = document.querySelectorAll('.style-post-list .post')[index];
-            return {
-                title: news.querySelector('.title').textContent,
-                description: news.querySelector('.excerpt').textContent,
-                date: news.querySelector('.date').textContent.split(' - ')[0],
-                time: news.querySelector('.date').textContent.split(' - ')[1],
-                image: news.querySelector('.image').getAttribute('src'),
-                newsLink: news.querySelector('.title a').getAttribute('href')
-            }
+app.use(express.json());
+app.use(routes);
 
-        });
+const port = process.env.SERVER_PORT;
 
-        
-        return contact;
-    });
-
-    await browser.close();
-
-    console.log(info);
-
-    console.log('finalizado');
-    return info;
-}
-
-getInfo()
+app.listen(port,()=>{
+    console.log(`Server is running at localhost:${port}`);
+});
